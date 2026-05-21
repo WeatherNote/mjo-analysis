@@ -1,0 +1,19 @@
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+.env
+
+# Generated data and figures
+data/raw/era5/*.nc
+data/raw/era5/.cds_jobs.json
+data/raw/mjo/rmm.74toRealtime.txt
+data/raw/enso/oni.ascii.txt
+data/interim/
+data/processed/
+figures/
+!data/raw/mjo/.gitkeep
+!data/raw/enso/.gitkeep
+
+# Notebook checkpoints
+.ipynb_checkpoints/

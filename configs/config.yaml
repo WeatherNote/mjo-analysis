@@ -1,0 +1,75 @@
+# MJO phase composite analysis config
+# All paths are relative to the repository root.
+
+period:
+  start: 1979-06-01
+  end:   2023-08-31
+  # Climatology base period (inclusive)
+  base_climatology: [1991, 2020]
+  # RMM index is loaded slightly wider so lag selection at the edges of JJA still has data.
+  rmm_buffer_start: 1979-05-01
+  rmm_buffer_end:   2023-09-30
+
+# ERA5 download area [N, W, S, E]
+area:
+  north: 60
+  south: 0
+  west:  90
+  east:  180
+
+# Horizontal grid spacing in degrees (used for both lat/lon)
+grid: 0.5
+
+# Seasons (months included)
+seasons:
+  JJA: [6, 7, 8]
+  JJ:  [6, 7]
+  AUG: [8]
+
+# MJO RMM index settings
+mjo:
+  rmm_url: http://www.bom.gov.au/climate/mjo/graphics/rmm.74toRealtime.txt
+  active_amplitude: 1.0
+  sensitivity_amplitude: 1.5
+
+# Lags (days) for composites: response_date - lag = phase reference date.
+lags: [0, 5, 10]
+
+# Per-variable detrend flags
+detrend:
+  t2m: true
+  tp:  false
+
+# Climatology smoothing
+climatology:
+  method: harmonic       # one of: harmonic, running, raw
+  n_harmonics: 3
+  running_window: 31
+
+# ENSO categorization (NOAA CPC ONI)
+enso:
+  oni_url: https://www.cpc.ncep.noaa.gov/data/indices/oni.ascii.txt
+  threshold: 0.5
+  season_label: JJA      # CPC three-month season label for stratification
+
+# Region boxes for area-weighted averages [lat_min, lat_max, lon_min, lon_max]
+regions:
+  japan:        {lat: [30, 46], lon: [128, 146]}
+  north_japan:  {lat: [39, 46], lon: [139, 146]}
+  east_japan:   {lat: [34, 39], lon: [136, 142]}
+  west_japan:   {lat: [31, 36], lon: [130, 136]}
+  okinawa:      {lat: [24, 28], lon: [122, 130]}
+
+# Output paths
+paths:
+  raw_era5:        data/raw/era5
+  raw_mjo:         data/raw/mjo
+  raw_enso:        data/raw/enso
+  interim_era5:    data/interim/era5
+  interim_clim:    data/interim/clim
+  interim_anom:    data/interim/anom
+  composites:     data/processed/composites
+  regions:        data/processed/regions
+  figures_maps:   figures/maps
+  figures_lag:    figures/maps/lag
+  figures_heatmap: figures/heatmaps
