@@ -14,7 +14,7 @@ import xarray as xr
 
 from .io import ERA5_VARS, ensure_dir
 
-DATASET = "reanalysis-era5-single-levels-daily-statistics"
+DATASET = "derived-era5-single-levels-daily-statistics"
 EXPECTED_JJA_DAYS = 92  # 30 + 31 + 31
 
 log = logging.getLogger(__name__)
