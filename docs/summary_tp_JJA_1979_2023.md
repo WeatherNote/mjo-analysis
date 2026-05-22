@@ -189,20 +189,101 @@ MJO Phase 6 は対流活発域が日付変更線付近にある段階で、西�
 
 ---
 
-## 8. 解釈上の注意
+## 8. ENSO 層別
+
+NOAA CPC ONI JJA 値で El Niño / La Niña / Neutral に分類（気温解析と同一カテゴリ）。
+
+### 8.1 サンプル日数 (JJA, lag=0)
+
+| Phase | El Niño | La Niña | Neutral |
+|---|---:|---:|---:|
+| 1 | 92 | 145 | 283 |
+| 2 | 65 | 159 | 195 |
+| 3 | 59 | **37** | 111 |
+| 4 | 59 | **36** | 116 |
+| 5 | 86 | **29** | 159 |
+| 6 | 85 | **28** | 195 |
+| 7 | 75 | **19** | 100 |
+| 8 | 70 | 41 | 96 |
+
+**警告**: La Niña × Phase 5–7 は n < 30 と極端に少ない。特に La Niña × P7 は **n=19** で、1–2 件のイベントに値が支配される。これらの数値は定量的には扱わず、方向性のみ参考とする。
+
+### 8.2 japan ボックス JJA lag=0 比較 (mm/day)
+
+| Phase | 全 ENSO | El Niño | La Niña | Neutral |
+|---|---:|---:|---:|---:|
+| 1 | −0.16 | **−0.60** | +0.36 | −0.29 |
+| 2 | +0.21 | +0.31 | +0.25 | +0.16 |
+| 3 | −0.55 | +0.18 | −0.18 | **−1.06** |
+| 4 | **+0.61** | **+0.85** | +0.34 | +0.57 |
+| 5 | +0.32 | +0.53 | −0.14 | +0.29 |
+| 6 | −0.61 | −0.34 | −0.80 | −0.70 |
+| 7 | +0.24 | +0.57 | +0.68 | −0.10 |
+| 8 | **+1.06** | +1.11 | **+1.75** | +0.72 |
+
+### 8.3 各位相の ENSO 依存性
+
+#### Phase 8 — 多雨シグナルは全 ENSO 層で安定
+
+ALL / El Niño / La Niña / Neutral ともに正で符号が変わらない唯一の位相。La Niña でさらに強化 (+1.75 mm/day)。**降水における最も頑健な MJO シグナル**。
+
+#### Phase 4 — El Niño 年で特に多雨
+
+El Niño +0.85、Neutral +0.57 と全層で正。La Niña +0.34 は弱いが正を維持。El Niño 年の Phase 4 では西日本で +2.09 mm/day と突出して大きく、El Niño × 梅雨前線活発化との関連が示唆される。
+
+#### Phase 6 — 少雨は全 ENSO 層で安定
+
+El Niño −0.34、La Niña −0.80、Neutral −0.70 と全層で負。La Niña × Phase 6 では西日本が **−3.30 mm/day**（ただし n=28）、沖縄が +3.61 mm/day と南北で強い反位相。La Niña 夏の西日本少雨が MJO Phase 6 と重なると梅雨明け後の日照過多につながる可能性。
+
+#### Phase 3 — Neutral 年のみ明瞭な少雨
+
+ALL −0.55 は Neutral 年 −1.06 に引きずられた値で、El Niño / La Niña 年はほぼゼロ (±0.2 mm/day)。**「Phase 3 = 少雨」は Neutral 年限定**の信号で、全 ENSO 込みの値を ENSO 年に外挿するのは危険。
+
+#### Phase 1 — ENSO で符号反転
+
+El Niño −0.60 (少雨)、La Niña +0.36 (多雨) と逆符号。Neutral も −0.29。El Niño 年の Phase 1 では沖縄も −1.24 mm/day と広域少雨。
+
+#### Phase 7 — ENSO 年で多雨、Neutral で中立
+
+El Niño +0.57、La Niña +0.68 (n=19 で不確か) と ENSO 年では多雨傾向だが、Neutral −0.10 でほぼゼロ。全 ENSO 込みの +0.24 は El Niño / La Niña 年の寄与。La Niña × P7 の西日本 +2.61 mm/day は n=19 であり信頼性低。
+
+#### Phase 2, 5 — 弱信号・ENSO 依存小
+
+Phase 2 は全 ENSO 層で +0.16〜+0.31 と弱い正で安定。Phase 5 は El Niño / Neutral で弱正、La Niña でわずかに負と不安定。
+
+### 8.4 ENSO × MJO の総合像 (japan JJA)
+
+| Phase | 全 ENSO | El Niño | La Niña | Neutral | 安定性 |
+|---|---|---|---|---|---|
+| 1 | 少雨 | 少雨 | 多雨 | 少雨 | **ENSO で符号反転** |
+| 2 | 弱多雨 | 弱多雨 | 弱多雨 | 弱多雨 | 安定 (弱) |
+| 3 | 少雨 | ほぼ0 | ほぼ0 | **少雨** | **Neutral 年限定** |
+| 4 | 多雨 | **多雨** | 弱多雨 | 多雨 | 安定 |
+| 5 | 弱多雨 | 弱多雨 | ほぼ0 | 弱多雨 | 弱・不安定 |
+| 6 | 少雨 | 少雨 | 少雨 | 少雨 | **安定** |
+| 7 | 弱多雨 | 多雨 | 多雨(脆) | ほぼ0 | Neutral で消失 |
+| **8** | **多雨** | **多雨** | **強多雨** | 多雨 | **最安定** |
+
+---
+
+## 9. 解釈上の注意
 
 1. **振幅閾値の違い**: 本ドキュメントは amp≥1.0 (気温主要ランの amp≥0.5 より厳しい)。閾値を下げると信号が弱まりノイズが増えるため、比較する際は揃えることが理想。
-2. **ENSO 層別未実施**: 降水の ENSO 依存性は気温以上に大きい可能性がある（La Niña 夏の太平洋高気圧強化 = 少雨など）。今後の課題。
-3. **台風**: 台風の上陸は特定の MJO 位相と相関することが知られており (一般に Phase 5–8 で西太平洋台風が活発)、その寄与が本コンポジットの Phase 8 多雨に含まれている可能性がある。
-4. **標準偏差ファイル未出力**: 今回の composite NetCDF には mean のみで std が含まれない。精確な SE 計算には script/06 の再実行 (std 出力あり) が必要。
+2. **台風**: 台風の上陸は特定の MJO 位相と相関することが知られており (一般に Phase 5–8 で西太平洋台風が活発)、その寄与が本コンポジットの Phase 8 多雨に含まれている可能性がある。
+3. **La Niña 小サンプル**: La Niña × Phase 5–7 は n < 30 で定量的な利用不可。方向性の参考に留める。
+4. **t検定スティップリング**: 各マップには p<0.05 の有意格子に黒点を重ねて表示。ENSO 層別マップではサンプルが少ないため有意域が狭くなる。
 
 ---
 
 ## 付録: 生成ファイル
 
-参照・生成されたファイル (data/processed/ は .gitignore 対象のため、再生成は script/06–08 から):
+参照・生成されたファイル (data/processed/ は .gitignore 対象のため、再生成は scripts/06–08 から):
 
 - `data/processed/composites/composite_tp_mjo_amp10_lags.nc`
+- `data/processed/composites/composite_tp_mjo_amp10_{ElNino,LaNina,Neutral}_lags.nc`
 - `data/processed/regions/japan_region_tp_phase_lag.csv`
+- `data/processed/regions/japan_region_tp_phase_lag_{ElNino,LaNina,Neutral}.csv`
 - `figures/maps/fig_tp_{JJA,JJ,AUG}_lag+0.png`
+- `figures/maps/fig_tp_{JJA,JJ,AUG}_lag+0_{ElNino,LaNina,Neutral}.png`
 - `figures/heatmaps/heatmap_{region}_tp_{JJA,JJ,AUG}.png`
+- `figures/heatmaps/heatmap_{region}_tp_{JJA,JJ,AUG}_{ElNino,LaNina,Neutral}.png`
