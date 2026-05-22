@@ -58,6 +58,8 @@ def main() -> None:
         choices=["ElNino", "Neutral", "LaNina"],
         help="Restrict RMM to years of specified ENSO category.",
     )
+    parser.add_argument("--year-start", type=int, default=None, help="First year to include.")
+    parser.add_argument("--year-end",   type=int, default=None, help="Last year to include.")
     args = parser.parse_args()
 
     cfg = load_config(args.config)
@@ -79,6 +81,14 @@ def main() -> None:
 
     logging.info("Loading RMM from %s", rmm_path)
     rmm = pd.read_csv(rmm_path, parse_dates=["date"])
+
+    year_tag = ""
+    if args.year_start or args.year_end:
+        ys = args.year_start or y0
+        ye = args.year_end   or y1
+        rmm = rmm[(rmm["date"].dt.year >= ys) & (rmm["date"].dt.year <= ye)].reset_index(drop=True)
+        year_tag = f"_{ys}_{ye}"
+        logging.info("Year filter: %d–%d → %d RMM rows", ys, ye, len(rmm))
 
     enso_tag = ""
     if args.enso:
@@ -112,9 +122,9 @@ def main() -> None:
             amp_threshold=amp,
         )
 
-        nc_path = composites_dir / f"composite_{var}_mjo_{amp_tag}{enso_tag}_lags.nc"
-        std_path = composites_dir / f"composite_{var}_mjo_{amp_tag}{enso_tag}_std_lags.nc"
-        csv_path = composites_dir / f"sample_count_{var}_mjo_{amp_tag}{enso_tag}.csv"
+        nc_path = composites_dir / f"composite_{var}_mjo_{amp_tag}{year_tag}{enso_tag}_lags.nc"
+        std_path = composites_dir / f"composite_{var}_mjo_{amp_tag}{year_tag}{enso_tag}_std_lags.nc"
+        csv_path = composites_dir / f"sample_count_{var}_mjo_{amp_tag}{year_tag}{enso_tag}.csv"
         logging.info("[%s] writing %s", var, nc_path)
         to_netcdf(comp, nc_path)
         to_netcdf(comp_std, std_path)
