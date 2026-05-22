@@ -45,9 +45,6 @@ def main() -> None:
     figures_main = repo_path(cfg["paths"]["figures_maps"])
     figures_lag = repo_path(cfg["paths"]["figures_lag"])
 
-    jb = cfg["regions"]["japan"]
-    japan_box = (jb["lat"], jb["lon"])
-
     vars_to_run = ["t2m", "tp"] if args.variable == "all" else [args.variable]
     season_keys = list(cfg["seasons"]) if args.season == "all" else [args.season]
     lag_keys = cfg["lags"] if args.lag == "all" else [int(args.lag)]
@@ -77,7 +74,7 @@ def main() -> None:
                     var=var,
                     title=title,
                     savepath=out_path,
-                    japan_box=japan_box,
+                    japan_box=None,
                 )
 
 
