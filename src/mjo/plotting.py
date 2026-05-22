@@ -10,8 +10,8 @@ from scipy import stats
 
 # Discrete contour levels per variable
 LEVELS = {
-    "t2m": [-3, -2, -1, -0.5, 0.5, 1, 2, 3],
-    "tp":  [-6, -3, -1.5, -0.5, 0.5, 1.5, 3, 6],
+    "t2m": [-3, -2, -1, -0.5, 0, 0.5, 1, 2, 3],
+    "tp":  [-6, -3, -1.5, -0.5, 0, 0.5, 1.5, 3, 6],
 }
 CMAPS = {"t2m": "RdBu_r", "tp": "BrBG"}
 UNITS = {"t2m": "°C", "tp": "mm/day"}
