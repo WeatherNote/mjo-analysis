@@ -52,6 +52,12 @@ def main() -> None:
         default=None,
         help="Lag days (default: config lags).",
     )
+    parser.add_argument(
+        "--enso",
+        default=None,
+        choices=["ElNino", "Neutral", "LaNina"],
+        help="Restrict RMM to years of specified ENSO category.",
+    )
     args = parser.parse_args()
 
     cfg = load_config(args.config)
@@ -73,6 +79,15 @@ def main() -> None:
 
     logging.info("Loading RMM from %s", rmm_path)
     rmm = pd.read_csv(rmm_path, parse_dates=["date"])
+
+    enso_tag = ""
+    if args.enso:
+        enso_csv = repo_path(cfg["paths"]["raw_enso"]) / "enso_category_1979_2023.csv"
+        enso_df = pd.read_csv(enso_csv)
+        enso_years = set(enso_df.loc[enso_df["ENSO_category"] == args.enso, "year"])
+        rmm = rmm[rmm["date"].dt.year.isin(enso_years)].reset_index(drop=True)
+        enso_tag = f"_{args.enso}"
+        logging.info("ENSO filter: %s → %d RMM rows", args.enso, len(rmm))
 
     vars_to_run = ["t2m", "tp"] if args.variable == "all" else [args.variable]
     phases = list(range(1, 9))
@@ -97,8 +112,8 @@ def main() -> None:
             amp_threshold=amp,
         )
 
-        nc_path = composites_dir / f"composite_{var}_mjo_{amp_tag}_lags.nc"
-        csv_path = composites_dir / f"sample_count_{var}_mjo_{amp_tag}.csv"
+        nc_path = composites_dir / f"composite_{var}_mjo_{amp_tag}{enso_tag}_lags.nc"
+        csv_path = composites_dir / f"sample_count_{var}_mjo_{amp_tag}{enso_tag}.csv"
         logging.info("[%s] writing %s", var, nc_path)
         to_netcdf(comp, nc_path)
         counts.to_csv(csv_path, index=False)

@@ -47,12 +47,15 @@ def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--variable", required=True, choices=["t2m", "tp", "all"])
     parser.add_argument("--amplitude", type=float, default=None)
+    parser.add_argument("--enso", default=None, choices=["ElNino", "Neutral", "LaNina"])
     parser.add_argument("--config", default=None)
     args = parser.parse_args()
 
     cfg = load_config(args.config)
     amp = float(args.amplitude if args.amplitude is not None else cfg["mjo"]["active_amplitude"])
     amp_tag = f"amp{str(amp).replace('.', '')}"
+    enso_tag = f"_{args.enso}" if args.enso else ""
+    enso_label = f"  [{args.enso}]" if args.enso else ""
 
     composites_dir = repo_path(cfg["paths"]["composites"])
     out_dir = ensure_dir(repo_path(cfg["paths"]["regions"]))
@@ -66,8 +69,8 @@ def main() -> None:
     vars_to_run = ["t2m", "tp"] if args.variable == "all" else [args.variable]
 
     for var in vars_to_run:
-        nc_path = composites_dir / f"composite_{var}_mjo_{amp_tag}_lags.nc"
-        csv_path = composites_dir / f"sample_count_{var}_mjo_{amp_tag}.csv"
+        nc_path = composites_dir / f"composite_{var}_mjo_{amp_tag}{enso_tag}_lags.nc"
+        csv_path = composites_dir / f"sample_count_{var}_mjo_{amp_tag}{enso_tag}.csv"
         with xr.open_dataset(nc_path) as ds:
             comp = ds[var].load()
         counts_df = pd.read_csv(csv_path)
@@ -96,7 +99,7 @@ def main() -> None:
                         )
 
         df = pd.DataFrame(rows)
-        out_csv = out_dir / f"japan_region_{var}_phase_lag.csv"
+        out_csv = out_dir / f"japan_region_{var}_phase_lag{enso_tag}.csv"
         df.to_csv(out_csv, index=False)
         logging.info("Wrote %s", out_csv)
 
@@ -114,8 +117,8 @@ def main() -> None:
                     .reindex(index=phases, columns=lags)
                     .values
                 )
-                title = f"{region}  {var}  {season}  (amp>={amp})"
-                out_png = heatmap_dir / f"heatmap_{region}_{var}_{season}.png"
+                title = f"{region}  {var}  {season}  (amp>={amp}){enso_label}"
+                out_png = heatmap_dir / f"heatmap_{region}_{var}_{season}{enso_tag}.png"
                 phase_lag_heatmap(
                     matrix=mat,
                     phases=phases,

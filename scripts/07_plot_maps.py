@@ -34,12 +34,15 @@ def main() -> None:
     parser.add_argument("--season", default="all")
     parser.add_argument("--lag", default="all", help="Integer lag or 'all'.")
     parser.add_argument("--amplitude", type=float, default=None)
+    parser.add_argument("--enso", default=None, choices=["ElNino", "Neutral", "LaNina"])
     parser.add_argument("--config", default=None)
     args = parser.parse_args()
 
     cfg = load_config(args.config)
     amp = float(args.amplitude if args.amplitude is not None else cfg["mjo"]["active_amplitude"])
     amp_tag = f"amp{str(amp).replace('.', '')}"
+    enso_tag = f"_{args.enso}" if args.enso else ""
+    enso_label = f"  [{args.enso}]" if args.enso else ""
 
     composites_dir = repo_path(cfg["paths"]["composites"])
     figures_main = repo_path(cfg["paths"]["figures_maps"])
@@ -50,8 +53,8 @@ def main() -> None:
     lag_keys = cfg["lags"] if args.lag == "all" else [int(args.lag)]
 
     for var in vars_to_run:
-        nc_path = composites_dir / f"composite_{var}_mjo_{amp_tag}_lags.nc"
-        csv_path = composites_dir / f"sample_count_{var}_mjo_{amp_tag}.csv"
+        nc_path = composites_dir / f"composite_{var}_mjo_{amp_tag}{enso_tag}_lags.nc"
+        csv_path = composites_dir / f"sample_count_{var}_mjo_{amp_tag}{enso_tag}.csv"
         with xr.open_dataset(nc_path) as ds:
             comp = ds[var].load()
         counts_df = pd.read_csv(csv_path)
@@ -65,8 +68,9 @@ def main() -> None:
                     .to_dict()
                 )
                 out_dir = figures_lag if lag != 0 else figures_main
-                out_path = out_dir / f"fig_{var}_{season}_lag{lag:+d}.png"
-                title = f"{var} anomaly  {season}  lag={lag:+d}  (amp>={amp})"
+                fname = f"fig_{var}_{season}_lag{lag:+d}{enso_tag}.png"
+                out_path = out_dir / fname
+                title = f"{var} anomaly  {season}  lag={lag:+d}  (amp>={amp}){enso_label}"
                 logging.info("Plotting %s", out_path.name)
                 eight_panel_map(
                     da_phase=da_phase,
