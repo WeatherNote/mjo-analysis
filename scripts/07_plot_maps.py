@@ -53,15 +53,22 @@ def main() -> None:
     lag_keys = cfg["lags"] if args.lag == "all" else [int(args.lag)]
 
     for var in vars_to_run:
-        nc_path = composites_dir / f"composite_{var}_mjo_{amp_tag}{enso_tag}_lags.nc"
+        nc_path  = composites_dir / f"composite_{var}_mjo_{amp_tag}{enso_tag}_lags.nc"
+        std_path = composites_dir / f"composite_{var}_mjo_{amp_tag}{enso_tag}_std_lags.nc"
         csv_path = composites_dir / f"sample_count_{var}_mjo_{amp_tag}{enso_tag}.csv"
         with xr.open_dataset(nc_path) as ds:
             comp = ds[var].load()
+        std_name = f"{var}_std"
+        comp_std = None
+        if std_path.exists():
+            with xr.open_dataset(std_path) as ds:
+                comp_std = ds[std_name].load() if std_name in ds else None
         counts_df = pd.read_csv(csv_path)
 
         for season in season_keys:
             for lag in lag_keys:
                 da_phase = comp.sel(season=season, lag=lag)
+                da_std_phase = comp_std.sel(season=season, lag=lag) if comp_std is not None else None
                 count_lookup = (
                     counts_df.query("season == @season and lag == @lag")
                     .set_index("phase")["n_days"]
@@ -79,6 +86,7 @@ def main() -> None:
                     title=title,
                     savepath=out_path,
                     japan_box=None,
+                    da_std=da_std_phase,
                 )
 
 

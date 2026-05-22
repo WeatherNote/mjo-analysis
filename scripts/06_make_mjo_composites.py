@@ -103,7 +103,7 @@ def main() -> None:
             "[%s] building composites: seasons=%s phases=1..8 lags=%s threshold=%.1f",
             var, list(seasons), lags, amp,
         )
-        comp, counts = build_all_composites(
+        comp, comp_std, counts = build_all_composites(
             anom=anom,
             rmm=rmm,
             seasons=seasons,
@@ -113,9 +113,11 @@ def main() -> None:
         )
 
         nc_path = composites_dir / f"composite_{var}_mjo_{amp_tag}{enso_tag}_lags.nc"
+        std_path = composites_dir / f"composite_{var}_mjo_{amp_tag}{enso_tag}_std_lags.nc"
         csv_path = composites_dir / f"sample_count_{var}_mjo_{amp_tag}{enso_tag}.csv"
         logging.info("[%s] writing %s", var, nc_path)
         to_netcdf(comp, nc_path)
+        to_netcdf(comp_std, std_path)
         counts.to_csv(csv_path, index=False)
         logging.info("[%s] writing %s", var, csv_path)
 

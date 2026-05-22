@@ -6,6 +6,7 @@ from pathlib import Path
 import matplotlib.pyplot as plt
 import numpy as np
 import xarray as xr
+from scipy import stats
 
 # Discrete contour levels per variable
 LEVELS = {
@@ -47,6 +48,8 @@ def eight_panel_map(
     title: str,
     savepath: Path,
     japan_box: tuple[list[float], list[float]] | None = None,
+    da_std: xr.DataArray | None = None,   # same shape as da_phase
+    pvalue_threshold: float = 0.05,
 ) -> Path:
     """Draw an 8-panel composite map (phases 1..8) and save to `savepath`.
 
@@ -95,6 +98,24 @@ def eight_panel_map(
             _japan_box(ax, japan_box[0], japan_box[1])
         n = counts.get(int(phase), 0)
         ax.set_title(f"Phase {phase}  n={n}", fontsize=10)
+
+        # t-test stippling
+        if da_std is not None and n >= 2:
+            std_field = da_std.sel(phase=phase).values
+            with np.errstate(divide="ignore", invalid="ignore"):
+                t_stat = field / (std_field / np.sqrt(n))
+            pval = 2 * stats.t.sf(np.abs(t_stat), df=n - 1)
+            sig = pval < pvalue_threshold
+            lon2d, lat2d = np.meshgrid(lons, lats)
+            # Subsample to avoid over-dense stippling (every 3rd grid point)
+            sl = (slice(None, None, 3), slice(None, None, 3))
+            xs, ys, ms = lon2d[sl][sig[sl]], lat2d[sl][sig[sl]], sig[sl]
+            if use_cartopy:
+                import cartopy.crs as ccrs
+                ax.scatter(xs, ys, s=1.5, c="k", alpha=0.5,
+                           transform=ccrs.PlateCarree(), linewidths=0)
+            else:
+                ax.scatter(xs, ys, s=1.5, c="k", alpha=0.5, linewidths=0)
 
     cbar = fig.colorbar(
         cs, ax=axes.ravel().tolist(), orientation="horizontal",

@@ -19,6 +19,7 @@ import xarray as xr
 @dataclass
 class CompositeResult:
     mean: xr.DataArray  # (lat, lon)
+    std: xr.DataArray   # (lat, lon), sample std of daily values
     n: int
 
 
@@ -50,12 +51,16 @@ def select_response_dates(
 def composite_mean(
     anom: xr.DataArray, response_dates: pd.DatetimeIndex
 ) -> CompositeResult:
-    """Mean of `anom` over the given response dates."""
+    """Mean and std of `anom` over the given response dates."""
     if len(response_dates) == 0:
-        empty = anom.isel(time=0).where(False)
-        return CompositeResult(mean=empty.drop_vars("time", errors="ignore"), n=0)
+        empty = anom.isel(time=0).where(False).drop_vars("time", errors="ignore")
+        return CompositeResult(mean=empty, std=empty, n=0)
     sub = anom.sel(time=response_dates.intersection(anom["time"].to_index()))
-    return CompositeResult(mean=sub.mean("time"), n=sub.sizes["time"])
+    return CompositeResult(
+        mean=sub.mean("time"),
+        std=sub.std("time", ddof=1),
+        n=sub.sizes["time"],
+    )
 
 
 def build_all_composites(
@@ -77,7 +82,8 @@ def build_all_composites(
     nlat = anom.sizes["lat"]
     nlon = anom.sizes["lon"]
     shape = (len(season_names), len(phases), len(lags), nlat, nlon)
-    arr = np.full(shape, np.nan, dtype=np.float32)
+    arr_mean = np.full(shape, np.nan, dtype=np.float32)
+    arr_std  = np.full(shape, np.nan, dtype=np.float32)
     counts_rows = []
 
     for si, sname in enumerate(season_names):
@@ -88,30 +94,31 @@ def build_all_composites(
                 )
                 res = composite_mean(anom, dates)
                 if res.n > 0:
-                    arr[si, pi, li] = res.mean.values
+                    arr_mean[si, pi, li] = res.mean.values
+                    arr_std [si, pi, li] = res.std.values
                 counts_rows.append(
                     dict(season=sname, phase=phase, lag=lag, n_days=res.n)
                 )
 
-    out = xr.DataArray(
-        arr,
-        dims=("season", "phase", "lag", "lat", "lon"),
-        coords={
-            "season": season_names,
-            "phase": phases,
-            "lag": lags,
-            "lat": anom["lat"],
-            "lon": anom["lon"],
-        },
-        name=anom.name,
-        attrs={
-            **anom.attrs,
-            "composite_definition": (
-                "mean of anomaly on response date d where "
-                "phase(d-lag)==phase and amplitude(d-lag)>=threshold"
-            ),
-            "amp_threshold": amp_threshold,
-        },
-    )
+    coords = {
+        "season": season_names,
+        "phase": phases,
+        "lag": lags,
+        "lat": anom["lat"],
+        "lon": anom["lon"],
+    }
+    base_attrs = {
+        **anom.attrs,
+        "composite_definition": (
+            "mean of anomaly on response date d where "
+            "phase(d-lag)==phase and amplitude(d-lag)>=threshold"
+        ),
+        "amp_threshold": amp_threshold,
+    }
+    out = xr.DataArray(arr_mean, dims=("season", "phase", "lag", "lat", "lon"),
+                       coords=coords, name=anom.name, attrs=base_attrs)
+    out_std = xr.DataArray(arr_std, dims=("season", "phase", "lag", "lat", "lon"),
+                           coords=coords, name=f"{anom.name}_std",
+                           attrs={**base_attrs, "description": "sample std of daily composited values"})
     counts = pd.DataFrame(counts_rows)
-    return out, counts
+    return out, out_std, counts
