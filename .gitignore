@@ -17,3 +17,6 @@ figures/
 
 # Notebook checkpoints
 .ipynb_checkpoints/
+
+# Claude Code internal files
+.claude/
