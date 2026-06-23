@@ -7,7 +7,10 @@ Usage:
 The CDS dataset used here is `reanalysis-era5-single-levels-daily-statistics`.
 Submitting one request per (variable, year) keeps each request small and
 allows simple resume: if `data/raw/era5/{var}_{year}.nc` already exists and
-contains at least 92 JJA time steps, the request is skipped.
+already contains all requested months, the request is skipped.
+
+The months downloaded are controlled by ``period.download_months`` in the
+config (default: [6, 7, 8]).
 
 Run this locally where ~/.cdsapirc is configured. CDS jobs queue and may take
 several minutes each; the script polls until each retrieve() returns.
@@ -45,6 +48,7 @@ def main() -> None:
     cfg = load_config(args.config)
     area = [cfg["area"]["north"], cfg["area"]["west"], cfg["area"]["south"], cfg["area"]["east"]]
     grid = cfg["grid"]
+    download_months = list(cfg["period"].get("download_months", [6, 7, 8]))
 
     out_dir = ensure_dir(repo_path(cfg["paths"]["raw_era5"]))
 
@@ -73,7 +77,7 @@ def main() -> None:
                 out_dir=out_dir,
                 area=area,
                 grid=grid,
-                months=[6, 7, 8],
+                months=download_months,
             )
 
     logging.info("Done.")

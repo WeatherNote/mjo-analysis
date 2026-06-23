@@ -2,10 +2,11 @@
 
 Submits one request per (variable, year) and writes yearly NetCDFs into
 `data/raw/era5/`. Resumes by skipping years whose file already exists and
-contains the expected number of JJA days.
+contains at least the expected number of days for the requested months.
 """
 from __future__ import annotations
 
+import calendar
 import logging
 import time
 from pathlib import Path
@@ -15,7 +16,10 @@ import xarray as xr
 from .io import ERA5_VARS, ensure_dir
 
 DATASET = "derived-era5-single-levels-daily-statistics"
-EXPECTED_JJA_DAYS = 92  # 30 + 31 + 31
+EXPECTED_JJA_DAYS = 92  # 30 + 31 + 31  (kept for backward compatibility)
+
+# Days per month (non-leap year) used to estimate expected time steps.
+_DAYS_IN_MONTH = {m: calendar.monthrange(2001, m)[1] for m in range(1, 13)}
 
 log = logging.getLogger(__name__)
 
@@ -78,14 +82,18 @@ def submit_year(
 ) -> Path:
     """Submit one (var, year) request and write the result to `out_dir`.
 
-    Skips the request if the output file already exists and looks complete.
+    Skips the request if the output file already exists and looks complete
+    (i.e. contains at least as many time steps as there are days in the
+    requested months for a non-leap year).
+
     Retries with exponential backoff on transient errors.
     """
     ensure_dir(out_dir)
     out_path = out_dir / f"{var}_{year}.nc"
-    expected = EXPECTED_JJA_DAYS if months is None or set(months) == {6, 7, 8} else None
+    _months = months if months is not None else [6, 7, 8]
+    expected = sum(_DAYS_IN_MONTH[m] for m in _months)
 
-    if expected is not None and _is_complete(out_path, expected):
+    if _is_complete(out_path, expected):
         log.info("Skipping %s (already complete)", out_path.name)
         return out_path
 

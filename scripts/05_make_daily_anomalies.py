@@ -1,11 +1,13 @@
-"""Compute daily anomalies (and optionally detrend) for ERA5 JJA fields.
+"""Compute daily anomalies (and optionally detrend) for ERA5 fields.
 
 Reads:
-    data/interim/era5/{var}_jja_{y0}_{y1}.nc
-    data/interim/clim/{var}_clim_{by0}_{by1}_jja.nc
+    data/interim/era5/{var}_{file_tag}_{y0}_{y1}.nc
+    data/interim/clim/{var}_clim_{by0}_{by1}_{file_tag}.nc
 
 Writes:
-    data/interim/anom/{var}_anom_daily_jja_{y0}_{y1}.nc
+    data/interim/anom/{var}_anom_daily_{file_tag}_{y0}_{y1}.nc
+
+The ``file_tag`` is read from ``period.file_tag`` in the config (default: ``jja``).
 
 Detrend is per grid cell, linear in time, applied only to variables flagged
 in `detrend:` in the config (default: t2m only).
@@ -44,13 +46,14 @@ def main() -> None:
     y0 = int(str(cfg["period"]["start"])[:4])
     y1 = int(str(cfg["period"]["end"])[:4])
     by0, by1 = cfg["period"]["base_climatology"]
+    file_tag = cfg["period"].get("file_tag", "jja")
     detrend_flags = cfg["detrend"]
 
     vars_to_run = ["t2m", "tp"] if args.variable == "all" else [args.variable]
 
     for var in vars_to_run:
-        data_path = interim_era5 / f"{var}_jja_{y0}_{y1}.nc"
-        clim_path = interim_clim / f"{var}_clim_{by0}_{by1}_jja.nc"
+        data_path = interim_era5 / f"{var}_{file_tag}_{y0}_{y1}.nc"
+        clim_path = interim_clim / f"{var}_clim_{by0}_{by1}_{file_tag}.nc"
         logging.info("[%s] reading %s and %s", var, data_path.name, clim_path.name)
         with xr.open_dataset(data_path) as ds_data, xr.open_dataset(clim_path) as ds_clim:
             da = ds_data[var].load()
@@ -64,7 +67,7 @@ def main() -> None:
         else:
             logging.info("[%s] detrend disabled", var)
 
-        out = interim_anom / f"{var}_anom_daily_jja_{y0}_{y1}.nc"
+        out = interim_anom / f"{var}_anom_daily_{file_tag}_{y0}_{y1}.nc"
         logging.info("[%s] writing %s", var, out)
         to_netcdf(anom, out)
 

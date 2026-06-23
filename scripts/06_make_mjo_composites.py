@@ -1,7 +1,7 @@
 """Build MJO phase composites for one or more variables, seasons, and lags.
 
 Reads:
-    data/interim/anom/{var}_anom_daily_jja_{y0}_{y1}.nc
+    data/interim/anom/{var}_anom_daily_{file_tag}_{y0}_{y1}.nc
     data/raw/mjo/rmm_daily_1979_2023.csv
 
 Writes:
@@ -78,6 +78,7 @@ def main() -> None:
 
     y0 = int(str(cfg["period"]["start"])[:4])
     y1 = int(str(cfg["period"]["end"])[:4])
+    file_tag = cfg["period"].get("file_tag", "jja")
 
     logging.info("Loading RMM from %s", rmm_path)
     rmm = pd.read_csv(rmm_path, parse_dates=["date"])
@@ -104,7 +105,7 @@ def main() -> None:
     amp_tag = f"amp{str(amp).replace('.', '')}"
 
     for var in vars_to_run:
-        anom_path = interim_anom / f"{var}_anom_daily_jja_{y0}_{y1}.nc"
+        anom_path = interim_anom / f"{var}_anom_daily_{file_tag}_{y0}_{y1}.nc"
         logging.info("[%s] reading %s", var, anom_path.name)
         with xr.open_dataset(anom_path) as ds:
             anom = ds[var].load()

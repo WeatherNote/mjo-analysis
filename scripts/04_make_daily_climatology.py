@@ -3,10 +3,12 @@
 Steps:
     1. Open yearly raw files data/raw/era5/{var}_{YYYY}.nc and concatenate.
     2. Convert units (K -> degC, m/day -> mm/day) and standardize dim names.
-    3. Save the concatenated dataset to data/interim/era5/{var}_jja_1979_2023.nc.
+    3. Save the concatenated dataset to data/interim/era5/{var}_{file_tag}_{y0}_{y1}.nc.
     4. Restrict to the base period (1991-2020), compute the daily climatology
        and smooth with the configured method (default: first 3 harmonics).
-    5. Save to data/interim/clim/{var}_clim_1991_2020_jja.nc.
+    5. Save to data/interim/clim/{var}_clim_{by0}_{by1}_{file_tag}.nc.
+
+The ``file_tag`` is read from ``period.file_tag`` in the config (default: ``jja``).
 
 Usage:
     python scripts/04_make_daily_climatology.py --variable t2m
@@ -61,6 +63,7 @@ def main() -> None:
     y0 = int(str(cfg["period"]["start"])[:4])
     y1 = int(str(cfg["period"]["end"])[:4])
     by0, by1 = cfg["period"]["base_climatology"]
+    file_tag = cfg["period"].get("file_tag", "jja")
 
     method = cfg["climatology"]["method"]
     n_harm = int(cfg["climatology"]["n_harmonics"])
@@ -72,7 +75,7 @@ def main() -> None:
         logging.info("[%s] concatenating yearly ERA5 files", var)
         da = concat_yearly(var, raw_dir, range(y0, y1 + 1))
 
-        merged_path = interim_era5 / f"{var}_jja_{y0}_{y1}.nc"
+        merged_path = interim_era5 / f"{var}_{file_tag}_{y0}_{y1}.nc"
         logging.info("[%s] writing %s", var, merged_path)
         to_netcdf(da, merged_path)
 
@@ -84,7 +87,7 @@ def main() -> None:
             da, base_years=(by0, by1), method=method,
             n_harmonics=n_harm, running_window=win,
         )
-        clim_path = interim_clim / f"{var}_clim_{by0}_{by1}_jja.nc"
+        clim_path = interim_clim / f"{var}_clim_{by0}_{by1}_{file_tag}.nc"
         logging.info("[%s] writing %s", var, clim_path)
         to_netcdf(clim, clim_path)
 

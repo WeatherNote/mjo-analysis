@@ -3,12 +3,16 @@
 
 period:
   start: 1979-06-01
-  end:   2023-08-31
+  end:   2023-09-30
   # Climatology base period (inclusive)
   base_climatology: [1991, 2020]
   # RMM index is loaded slightly wider so lag selection at the edges of JJA still has data.
   rmm_buffer_start: 1979-05-01
   rmm_buffer_end:   2023-09-30
+  # Months to download from CDS (covers JJA + September for JAS support)
+  download_months: [6, 7, 8, 9]
+  # Tag used in interim filenames (e.g. jja, jjas)
+  file_tag: jjas
 
 # ERA5 download area [N, W, S, E]
 area:
@@ -25,6 +29,9 @@ seasons:
   JJA: [6, 7, 8]
   JJ:  [6, 7]
   AUG: [8]
+  JAS: [7, 8, 9]
+  JA:  [7, 8]
+  SEP: [9]
 
 # MJO RMM index settings
 mjo:
